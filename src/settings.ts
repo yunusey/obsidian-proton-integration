@@ -1,11 +1,16 @@
 import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
 
+import { clearPersistedCredentials } from './plugin-storage';
 import ObsidianProtonPlugin from './main';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface PluginSettings {}
+export interface PluginSettings {
+	/** When true, credentials are kept in memory only for this Obsidian session. */
+	credentialsInMemoryOnly: boolean;
+}
 
-export const DEFAULT_SETTINGS: PluginSettings = {};
+export const DEFAULT_SETTINGS: PluginSettings = {
+	credentialsInMemoryOnly: false,
+};
 
 export class ProtonSettingTab extends PluginSettingTab {
 	plugin: ObsidianProtonPlugin;
@@ -40,14 +45,44 @@ export class ProtonSettingTab extends PluginSettingTab {
 				}
 			});
 
-		new Setting(containerEl).setDesc(
-			'This is a third-party application not officially supported by proton. Your credentials are stored locally in Obsidian plugin data.',
-		);
+		new Setting(containerEl)
+			.setName('Keep credentials in memory only')
+			.setDesc(
+				'Do not write sign-in data to Obsidian plugin storage. You will need to sign in again after restarting Obsidian.',
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.credentialsInMemoryOnly)
+					.onChange(async (value) => {
+						this.plugin.settings.credentialsInMemoryOnly = value;
+						await this.plugin.saveSettings();
+						if (value) {
+							await clearPersistedCredentials(this.plugin);
+						}
+						this.display();
+					}),
+			);
+
+		new Setting(containerEl).setDesc(this.getPrivacyDisclaimer());
 	}
 
 	private getAccountStatusDescription(): string {
-		return this.plugin.driveService.isLoggedIn()
+		const status = this.plugin.driveService.isLoggedIn()
 			? 'Signed in to proton drive'
 			: 'Not signed in';
+
+		if (this.plugin.settings.credentialsInMemoryOnly) {
+			return `${status} (memory only)`;
+		}
+
+		return status;
+	}
+
+	private getPrivacyDisclaimer(): string {
+		if (this.plugin.settings.credentialsInMemoryOnly) {
+			return 'This is a third-party application not officially supported by proton. Sign-in data is kept in memory for this session only.';
+		}
+
+		return 'This is a third-party application not officially supported by proton. Sign-in data is stored in Obsidian plugin data unless you enable memory-only mode or sign out.';
 	}
 }
