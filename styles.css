@@ -1,8 +1,45 @@
-/*
+.proton-drive-embed-host {
+	margin: 0.75em 0;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+.proton-drive-embed {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 0.75em;
+	background: var(--background-secondary);
+}
 
-If your plugin does not need CSS, delete this file.
+.proton-drive-embed-loading {
+	color: var(--text-muted);
+	font-size: 0.9em;
+}
 
-*/
+.proton-drive-embed-placeholder {
+	color: var(--text-muted);
+	font-size: 0.9em;
+}
+
+.proton-drive-embed-caption {
+	color: var(--text-muted);
+	font-size: 0.85em;
+}
+
+.proton-drive-embed-image {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: 4px;
+}
+
+.proton-drive-embed-video {
+	display: block;
+	max-width: 100%;
+	border-radius: 4px;
+}
+
+.proton-drive-embed-link {
+	text-decoration: underline;
+}

@@ -4,7 +4,7 @@ Bridge between [Obsidian](https://obsidian.md) and [Proton Drive](https://proton
 
 ## Status
 
-Early foundation: browser sign-in, session persistence, and listing the root of **My files**. Sync with vaults is not implemented yet.
+Early foundation: browser sign-in, session persistence, and Proton drive link embeds in reading view.
 
 > **Note:** The Proton Drive SDK is still evolving and does not yet ship standalone auth. This plugin implements the same auth/API wiring pattern used by the [official Drive CLI](https://github.com/ProtonDriveApps/sdk/tree/main/js/cli).
 
@@ -26,15 +26,16 @@ Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/p
 
 ## Usage
 
-1. Open **Settings → Obsidian Proton Integration** and click **Sign in**, or run **Sign in to Proton Drive** from the command palette.
+1. Open **Settings → Obsidian Proton Integration** and click **Sign in**, or run **Sign in to proton drive** from the command palette.
 2. Complete sign-in in your browser when prompted.
-3. Use **List Proton Drive: My files** or click the cloud ribbon icon to list top-level items in My files.
+3. Embed a Proton drive file in a note with `![](https://drive.proton.me/...)` in reading view.
 
 ## Architecture
 
 ```
 src/
-  main.ts                 Plugin entry, commands, sign-in modal
+  main.ts                 Plugin entry, sign-in, embed registration
+  embed/                  Proton drive link embeds (reading view)
   settings.ts             Settings tab
   plugin-storage.ts       Credential + client UID persistence
   proton/
