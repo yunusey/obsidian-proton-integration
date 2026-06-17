@@ -17,8 +17,8 @@ Early foundation: browser sign-in, session persistence, and Proton drive link em
 
 ```bash
 npm install
-npm run dev      # watch build → main.js
-npm run build    # production bundle
+npm run dev
+npm run build
 npm run typecheck
 ```
 
