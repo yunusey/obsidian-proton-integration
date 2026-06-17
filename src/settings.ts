@@ -1,7 +1,6 @@
 import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
 
 import ObsidianProtonPlugin from './main';
-import { DriveService } from './proton/drive-service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PluginSettings {}
@@ -51,16 +50,4 @@ export class ProtonSettingTab extends PluginSettingTab {
 			? 'Signed in to proton drive'
 			: 'Not signed in';
 	}
-}
-
-export function formatDriveListing(
-	entries: Awaited<ReturnType<DriveService['listMyFilesChildren']>>,
-): string {
-	if (entries.length === 0) {
-		return 'My files is empty.';
-	}
-
-	return entries
-		.map((entry) => `${entry.type === 'folder' ? '📁' : '📄'} ${entry.name}`)
-		.join('\n');
 }

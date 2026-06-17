@@ -1,9 +1,4 @@
-import {
-	MemoryCache,
-	NodeEntity,
-	NodeType,
-	ProtonDriveClient,
-} from '@protontech/drive-sdk';
+import { MemoryCache, ProtonDriveClient } from '@protontech/drive-sdk';
 
 import { AccountApi } from './api/account-api';
 import { Addresses } from './api/addresses';
@@ -13,12 +8,6 @@ import { HTTPClient } from './api/http-client';
 import { Srp } from './api/srp';
 import { initProtonCrypto } from './crypto';
 import { Credentials, CredentialsStore } from './credentials';
-
-export interface DriveFolderEntry {
-	uid: string;
-	name: string;
-	type: 'file' | 'folder';
-}
 
 export class DriveService {
 	private credentials: Credentials;
@@ -66,22 +55,6 @@ export class DriveService {
 		await this.credentials.signOut();
 	}
 
-	async listMyFilesChildren(): Promise<DriveFolderEntry[]> {
-		const client = await this.getClient();
-		const root = await client.getMyFilesRootFolder();
-		const entries: DriveFolderEntry[] = [];
-
-		for await (const childUid of client.iterateFolderChildrenNodeUids(
-			root.uid,
-		)) {
-			const node = await client.getNode(childUid);
-			entries.push(toDriveFolderEntry(node));
-		}
-
-		entries.sort((a, b) => a.name.localeCompare(b.name));
-		return entries;
-	}
-
 	private ensureApiLayer(): void {
 		if (this.apiClient && this.auth && this.addresses) {
 			return;
@@ -116,20 +89,4 @@ export class DriveService {
 			},
 		});
 	}
-}
-
-function toDriveFolderEntry(node: NodeEntity): DriveFolderEntry {
-	const name = node.name.ok
-		? node.name.value
-		: node.name.error instanceof Error
-			? node.name.error.message
-			: 'name' in node.name.error
-				? node.name.error.name
-				: 'Unknown node';
-
-	return {
-		uid: node.uid,
-		name,
-		type: node.type === NodeType.Folder ? 'folder' : 'file',
-	};
 }

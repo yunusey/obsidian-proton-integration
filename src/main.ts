@@ -3,10 +3,11 @@ import '@protontech/crypto/polyfill';
 import { Modal, Notice, Plugin } from 'obsidian';
 
 import { getOrCreateClientUid, PluginCredentialStore } from './plugin-storage';
+import { registerProtonDriveEmbedProcessor } from './embed/proton-embed';
+import { ProtonEmbedResolver } from './proton/embed/resolver';
 import { DriveService } from './proton/drive-service';
 import {
 	DEFAULT_SETTINGS,
-	formatDriveListing,
 	PluginSettings,
 	ProtonSettingTab,
 } from './settings';
@@ -14,6 +15,7 @@ import {
 export default class ObsidianProtonPlugin extends Plugin {
 	settings!: PluginSettings;
 	driveService!: DriveService;
+	embedResolver!: ProtonEmbedResolver;
 
 	async onload() {
 		await this.loadSettings();
@@ -22,11 +24,13 @@ export default class ObsidianProtonPlugin extends Plugin {
 		this.driveService = new DriveService(credentialStore, () =>
 			getOrCreateClientUid(this),
 		);
+		this.embedResolver = new ProtonEmbedResolver(this.driveService);
 		await this.driveService.initialize();
 
-		this.addRibbonIcon('cloud', 'Proton drive', () => {
-			void this.listMyFiles();
-		});
+		registerProtonDriveEmbedProcessor(
+			(processor) => this.registerMarkdownPostProcessor(processor),
+			this.embedResolver,
+		);
 
 		this.addCommand({
 			id: 'proton-sign-in',
@@ -51,20 +55,6 @@ export default class ObsidianProtonPlugin extends Plugin {
 				}
 				if (!checking) {
 					void this.signOutOfProtonDrive();
-				}
-				return true;
-			},
-		});
-
-		this.addCommand({
-			id: 'proton-list-my-files',
-			name: 'List proton drive: My files',
-			checkCallback: (checking) => {
-				if (!this.driveService.isLoggedIn()) {
-					return false;
-				}
-				if (!checking) {
-					void this.listMyFiles();
 				}
 				return true;
 			},
@@ -112,18 +102,6 @@ export default class ObsidianProtonPlugin extends Plugin {
 	async signOutOfProtonDrive(): Promise<void> {
 		await this.driveService.logout();
 		new Notice('Signed out of proton drive');
-	}
-
-	async listMyFiles(): Promise<void> {
-		try {
-			const entries = await this.driveService.listMyFilesChildren();
-			new Notice(formatDriveListing(entries), 10_000);
-		} catch (error) {
-			const message =
-				error instanceof Error ? error.message : 'Failed to list files';
-			new Notice(`Proton Drive error: ${message}`);
-			console.error('Proton Drive list failed', error);
-		}
 	}
 }
 
