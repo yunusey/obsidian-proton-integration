@@ -3,17 +3,21 @@
 		"inlineSourceMap": true,
 		"inlineSources": true,
 		"module": "ESNext",
-		"target": "ES2021",
+		"target": "ES2022",
 		"strict": true,
 		"noImplicitReturns": true,
 		"noFallthroughCasesInSwitch": true,
 		"noUncheckedIndexedAccess": true,
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
+		"paths": {
+			"@protontech/crypto": ["./src/types/protontech-crypto.d.ts"],
+			"@protontech/crypto/*": ["./src/types/protontech-crypto.d.ts"]
+		},
 		"isolatedModules": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"allowSyntheticDefaultImports": true,
-		"lib": ["ES2021", "DOM"]
+		"lib": ["ES2022", "DOM"]
 	},
-	"include": ["src/**/*.ts"]
+	"include": ["src/**/*.ts", "src/**/*.d.ts"]
 }

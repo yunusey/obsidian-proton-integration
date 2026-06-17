@@ -1,89 +1,76 @@
-import {
-	Editor,
-	MarkdownView,
-	MarkdownFileInfo,
-	Modal,
-	Notice,
-	Plugin,
-} from 'obsidian';
+import '@protontech/crypto/polyfill';
+
+import { Modal, Notice, Plugin } from 'obsidian';
+
+import { getOrCreateClientUid, PluginCredentialStore } from './plugin-storage';
+import { DriveService } from './proton/drive-service';
 import {
 	DEFAULT_SETTINGS,
-	MyPluginSettings,
-	SampleSettingTab,
+	formatDriveListing,
+	PluginSettings,
+	ProtonSettingTab,
 } from './settings';
 
-// Remember to rename these classes and interfaces!
-
-export default class MyPlugin extends Plugin {
-	settings!: MyPluginSettings;
+export default class ObsidianProtonPlugin extends Plugin {
+	settings!: PluginSettings;
+	driveService!: DriveService;
 
 	async onload() {
 		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		this.addRibbonIcon('dice', 'Sample', (_evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-
-		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status bar text');
-
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-modal-simple',
-			name: 'Open modal (simple)',
-			callback: () => {
-				new SampleModal(this.app).open();
-			},
-		});
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'replace-selected',
-			name: 'Replace selected content',
-			editorCallback: (
-				editor: Editor,
-				_ctx: MarkdownView | MarkdownFileInfo,
-			) => {
-				editor.replaceSelection('Sample editor command');
-			},
-		});
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-modal-complex',
-			name: 'Open modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView =
-					this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
-				return false;
-			},
-		});
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
-		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(activeDocument, 'click', (_evt: MouseEvent) => {
-			new Notice('Click');
-		});
-
-		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-		this.registerInterval(
-			window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000),
+		const credentialStore = new PluginCredentialStore(this);
+		this.driveService = new DriveService(credentialStore, () =>
+			getOrCreateClientUid(this),
 		);
+		await this.driveService.initialize();
+
+		this.addRibbonIcon('cloud', 'Proton drive', () => {
+			void this.listMyFiles();
+		});
+
+		this.addCommand({
+			id: 'proton-sign-in',
+			name: 'Sign in to proton drive',
+			checkCallback: (checking) => {
+				if (this.driveService.isLoggedIn()) {
+					return false;
+				}
+				if (!checking) {
+					void this.signInToProtonDrive();
+				}
+				return true;
+			},
+		});
+
+		this.addCommand({
+			id: 'proton-sign-out',
+			name: 'Sign out of proton drive',
+			checkCallback: (checking) => {
+				if (!this.driveService.isLoggedIn()) {
+					return false;
+				}
+				if (!checking) {
+					void this.signOutOfProtonDrive();
+				}
+				return true;
+			},
+		});
+
+		this.addCommand({
+			id: 'proton-list-my-files',
+			name: 'List proton drive: My files',
+			checkCallback: (checking) => {
+				if (!this.driveService.isLoggedIn()) {
+					return false;
+				}
+				if (!checking) {
+					void this.listMyFiles();
+				}
+				return true;
+			},
+		});
+
+		this.addSettingTab(new ProtonSettingTab(this.app, this));
 	}
 
 	onunload() {}
@@ -92,19 +79,96 @@ export default class MyPlugin extends Plugin {
 		this.settings = Object.assign(
 			{},
 			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<MyPluginSettings>,
+			(await this.loadData()) as Partial<PluginSettings>,
 		);
 	}
 
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	async signInToProtonDrive(): Promise<void> {
+		const modal = new ProtonSignInModal(this.app, async (signInUrl) => {
+			window.open(signInUrl, '_blank');
+			new Notice('Complete sign-in in your browser, then return to Obsidian.');
+		});
+
+		try {
+			modal.open();
+			await this.driveService.getAuth().authViaWeb(async (signInUrl) => {
+				await modal.waitForUser(signInUrl);
+			});
+			modal.close();
+			new Notice('Signed in to proton drive');
+		} catch (error) {
+			modal.close();
+			const message =
+				error instanceof Error ? error.message : 'Sign-in failed';
+			new Notice(`Proton Drive sign-in failed: ${message}`);
+			console.error('Proton Drive sign-in failed', error);
+		}
+	}
+
+	async signOutOfProtonDrive(): Promise<void> {
+		await this.driveService.logout();
+		new Notice('Signed out of proton drive');
+	}
+
+	async listMyFiles(): Promise<void> {
+		try {
+			const entries = await this.driveService.listMyFilesChildren();
+			new Notice(formatDriveListing(entries), 10_000);
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : 'Failed to list files';
+			new Notice(`Proton Drive error: ${message}`);
+			console.error('Proton Drive list failed', error);
+		}
+	}
 }
 
-class SampleModal extends Modal {
+class ProtonSignInModal extends Modal {
+	private resolveOpen?: (signInUrl: string) => void;
+
+	constructor(
+		app: ObsidianProtonPlugin['app'],
+		private readonly onSignInUrl: (signInUrl: string) => void | Promise<void>,
+	) {
+		super(app);
+	}
+
 	onOpen() {
 		const { contentEl } = this;
-		contentEl.setText('Woah!');
+		contentEl.empty();
+		contentEl.createEl('h2', { text: 'Sign in to proton drive' });
+		contentEl.createEl('p', {
+			text: 'This is a third-party application not officially supported by proton.',
+		});
+		contentEl.createEl('p', {
+			text: 'Click the button below to open proton sign-in in your browser.',
+		});
+
+		const button = contentEl.createEl('button', { text: 'Open sign-in page' });
+		button.addEventListener('click', () => {
+			void this.openSignInPage();
+		});
+	}
+
+	waitForUser(signInUrl: string): Promise<void> {
+		this.pendingSignInUrl = signInUrl;
+		return new Promise((resolve) => {
+			this.resolveOpen = () => resolve();
+		});
+	}
+
+	private pendingSignInUrl?: string;
+
+	private async openSignInPage(): Promise<void> {
+		if (!this.pendingSignInUrl) {
+			return;
+		}
+		await this.onSignInUrl(this.pendingSignInUrl);
+		this.resolveOpen?.(this.pendingSignInUrl);
 	}
 
 	onClose() {

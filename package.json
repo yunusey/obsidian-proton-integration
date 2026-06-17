@@ -6,7 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
-		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"build": "node esbuild.config.mjs production",
+		"typecheck": "tsc -noEmit -skipLibCheck",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"lint": "eslint ."
 	},
@@ -23,5 +24,9 @@
 		"obsidian": "latest",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.59.1"
+	},
+	"dependencies": {
+		"@protontech/crypto": "^2.0.1",
+		"@protontech/drive-sdk": "^0.17.3"
 	}
 }

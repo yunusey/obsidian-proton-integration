@@ -1,18 +1,17 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
-import MyPlugin from './main';
+import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
 
-export interface MyPluginSettings {
-	mySetting: string;
-}
+import ObsidianProtonPlugin from './main';
+import { DriveService } from './proton/drive-service';
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default',
-};
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface PluginSettings {}
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export const DEFAULT_SETTINGS: PluginSettings = {};
 
-	constructor(app: App, plugin: MyPlugin) {
+export class ProtonSettingTab extends PluginSettingTab {
+	plugin: ObsidianProtonPlugin;
+
+	constructor(app: App, plugin: ObsidianProtonPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -22,17 +21,46 @@ export class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
+		new Setting(containerEl).setName('Proton drive').setHeading();
+
 		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc("It's a secret")
-			.addText((text) =>
-				text
-					.setPlaceholder('Enter your secret')
-					.setValue(this.plugin.settings.mySetting)
-					.onChange(async (value) => {
-						this.plugin.settings.mySetting = value;
-						await this.plugin.saveSettings();
-					}),
-			);
+			.setName('Account status')
+			.setDesc(this.getAccountStatusDescription())
+			.addButton((button) => {
+				if (this.plugin.driveService.isLoggedIn()) {
+					button.setButtonText('Sign out').onClick(async () => {
+						await this.plugin.driveService.logout();
+						new Notice('Signed out of proton drive');
+						this.display();
+					});
+				} else {
+					button.setButtonText('Sign in').onClick(async () => {
+						await this.plugin.signInToProtonDrive();
+						this.display();
+					});
+				}
+			});
+
+		new Setting(containerEl).setDesc(
+			'This is a third-party application not officially supported by proton. Your credentials are stored locally in Obsidian plugin data.',
+		);
 	}
+
+	private getAccountStatusDescription(): string {
+		return this.plugin.driveService.isLoggedIn()
+			? 'Signed in to proton drive'
+			: 'Not signed in';
+	}
+}
+
+export function formatDriveListing(
+	entries: Awaited<ReturnType<DriveService['listMyFilesChildren']>>,
+): string {
+	if (entries.length === 0) {
+		return 'My files is empty.';
+	}
+
+	return entries
+		.map((entry) => `${entry.type === 'folder' ? '📁' : '📄'} ${entry.name}`)
+		.join('\n');
 }
