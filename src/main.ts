@@ -2,7 +2,11 @@ import '@protontech/crypto/polyfill';
 
 import { Modal, Notice, Plugin } from 'obsidian';
 
-import { getOrCreateClientUid, PluginCredentialStore } from './plugin-storage';
+import {
+	clearPersistedCredentials,
+	createCredentialStore,
+	getOrCreateClientUid,
+} from './plugin-storage';
 import { registerProtonDriveEmbedProcessor } from './embed/proton-embed';
 import { ProtonEmbedResolver } from './proton/embed/resolver';
 import { DriveService } from './proton/drive-service';
@@ -20,7 +24,13 @@ export default class ObsidianProtonPlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		const credentialStore = new PluginCredentialStore(this);
+		if (this.settings.credentialsInMemoryOnly) {
+			await clearPersistedCredentials(this);
+		}
+
+		const credentialStore = createCredentialStore(this, () =>
+			this.shouldPersistCredentials(),
+		);
 		this.driveService = new DriveService(credentialStore, () =>
 			getOrCreateClientUid(this),
 		);
@@ -64,6 +74,10 @@ export default class ObsidianProtonPlugin extends Plugin {
 	}
 
 	onunload() {}
+
+	shouldPersistCredentials(): boolean {
+		return !this.settings.credentialsInMemoryOnly;
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(

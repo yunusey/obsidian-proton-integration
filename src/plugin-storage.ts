@@ -40,6 +40,36 @@ export class PluginCredentialStore implements CredentialsStore {
 	}
 }
 
+export function createCredentialStore(
+	plugin: Plugin,
+	shouldPersist: () => boolean,
+): CredentialsStore {
+	const disk = new PluginCredentialStore(plugin);
+	return {
+		load: async () => {
+			if (!shouldPersist()) {
+				return null;
+			}
+			return disk.load();
+		},
+		save: async (credentials) => {
+			if (!shouldPersist()) {
+				return;
+			}
+			await disk.save(credentials);
+		},
+		remove: async () => {
+			await disk.remove();
+		},
+	};
+}
+
+export async function clearPersistedCredentials(
+	plugin: Plugin,
+): Promise<void> {
+	await new PluginCredentialStore(plugin).remove();
+}
+
 export async function getOrCreateClientUid(plugin: Plugin): Promise<string> {
 	const data =
 		((await plugin.loadData()) as Record<string, unknown> | null) ?? {};
