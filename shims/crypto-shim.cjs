@@ -1,7 +1,7 @@
-function randomBytes(len) {
-	const bytes = new Uint8Array(len);
-	crypto.getRandomValues(bytes);
-	return bytes;
+function randomBytes() {
+	throw new Error(
+		'Node crypto shim: randomBytes should not be called; use Web Crypto instead',
+	);
 }
 
 module.exports = { randomBytes };
