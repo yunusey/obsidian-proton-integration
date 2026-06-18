@@ -5,5 +5,5 @@
 	"minAppVersion": "1.5.0",
 	"description": "Embed Proton Drive files in Obsidian notes.",
 	"author": "yunusey",
-	"isDesktopOnly": true
+	"isDesktopOnly": false
 }
