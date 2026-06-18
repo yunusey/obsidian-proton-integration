@@ -43,3 +43,29 @@
 .proton-drive-embed-link {
 	text-decoration: underline;
 }
+
+.proton-drive-embed-pdf {
+	display: block;
+	width: 100%;
+	min-height: 480px;
+	height: 70vh;
+	border: 0;
+	border-radius: 4px;
+	background: var(--background-primary);
+}
+
+.proton-drive-embed-text {
+	margin: 0;
+	max-height: 70vh;
+	overflow: auto;
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-size: 0.9em;
+	line-height: 1.5;
+}
+
+.proton-drive-embed-markdown {
+	max-height: 70vh;
+	overflow: auto;
+	padding: 0.25em 0;
+}

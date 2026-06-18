@@ -4,8 +4,11 @@ import { DriveService } from '../drive-service';
 import { downloadFileToArrayBuffer } from './download';
 import {
 	classifyEmbedMedia,
+	DocumentFormat,
 	EmbedMediaKind,
+	getDocumentFormat,
 	getNodeDisplayName,
+	maxBytesForEmbed,
 	mimeTypeForEmbed,
 } from './media';
 import { parseProtonDriveUrl, ParsedProtonDriveUrl } from '../url-parser';
@@ -27,14 +30,18 @@ export type PreparedEmbed =
 			mediaType: string;
 	  }
 	| {
+			status: 'ready';
+			mediaKind: 'document';
+			documentFormat: DocumentFormat;
+			fileName: string;
+			mediaType: string;
+			blobUrl?: string;
+			textContent?: string;
+	  }
+	| {
 			status: 'unsupported';
 			reason: string;
 			fileName?: string;
-			sourceUrl: string;
-	  }
-	| {
-			status: 'document';
-			fileName: string;
 			sourceUrl: string;
 	  }
 	| {
@@ -91,10 +98,52 @@ export class ProtonEmbedResolver {
 			}
 
 			if (fileInfo.mediaKind === 'document') {
+				const documentFormat = getDocumentFormat(
+					fileInfo.mediaType,
+					fileInfo.fileName,
+				);
+				if (!documentFormat) {
+					return {
+						status: 'unsupported',
+						reason: 'This file type cannot be embedded',
+						fileName: fileInfo.fileName,
+						sourceUrl,
+					};
+				}
+
+				const blob = await this.getOrDownloadBlob(
+					parsed,
+					fileInfo,
+					documentFormat,
+				);
+				const mediaType =
+					blob.type ||
+					mimeTypeForEmbed(
+						fileInfo.mediaKind,
+						fileInfo.mediaType,
+						fileInfo.fileName,
+					) ||
+					'application/octet-stream';
+
+				if (documentFormat === 'pdf') {
+					const blobUrl = URL.createObjectURL(blob);
+					return {
+						status: 'ready',
+						mediaKind: 'document',
+						documentFormat,
+						blobUrl,
+						fileName: fileInfo.fileName,
+						mediaType,
+					};
+				}
+
 				return {
-					status: 'document',
+					status: 'ready',
+					mediaKind: 'document',
+					documentFormat,
+					textContent: await blob.text(),
 					fileName: fileInfo.fileName,
-					sourceUrl,
+					mediaType,
 				};
 			}
 
@@ -164,6 +213,7 @@ export class ProtonEmbedResolver {
 	private async getOrDownloadBlob(
 		parsed: ParsedProtonDriveUrl,
 		fileInfo: EmbedFileInfo,
+		documentFormat?: DocumentFormat,
 	): Promise<Blob> {
 		const cached = this.blobCache.get(fileInfo.nodeUid);
 		if (cached) {
@@ -172,7 +222,10 @@ export class ProtonEmbedResolver {
 
 		const { client } = await this.getClientForLink(parsed);
 		const downloader = await client.getFileDownloader(fileInfo.nodeUid);
-		const data = await downloadFileToArrayBuffer(downloader);
+		const data = await downloadFileToArrayBuffer(
+			downloader,
+			maxBytesForEmbed(fileInfo.mediaKind, documentFormat),
+		);
 		const mimeType =
 			mimeTypeForEmbed(
 				fileInfo.mediaKind,

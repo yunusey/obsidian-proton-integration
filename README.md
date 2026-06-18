@@ -30,6 +30,8 @@ Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/p
 2. Complete sign-in in your browser when prompted.
 3. Embed a Proton drive file in a note with `![](https://drive.proton.me/...)` in reading view.
 
+Supported embed types: **images**, **videos**, and **documents** (PDF inline preview, plain text, and markdown).
+
 ### Privacy settings
 
 - **Keep credentials in memory only:** sign-in data is not written to Obsidian plugin storage; you sign in again after each Obsidian restart.
