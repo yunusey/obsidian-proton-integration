@@ -2,6 +2,8 @@ import { NodeType, Result } from '@protontech/drive-sdk';
 
 export type EmbedMediaKind = 'image' | 'video' | 'document' | 'unsupported';
 
+export type DocumentFormat = 'pdf' | 'markdown' | 'text';
+
 const IMAGE_EXTENSIONS = new Set([
 	'apng',
 	'avif',
@@ -135,4 +137,53 @@ export function mimeTypeForEmbed(
 	}
 
 	return undefined;
+}
+
+export function getDocumentFormat(
+	mediaType: string | undefined,
+	fileName: string,
+): DocumentFormat | undefined {
+	const normalizedMediaType = mediaType?.toLowerCase() ?? '';
+	if (normalizedMediaType === 'application/pdf') {
+		return 'pdf';
+	}
+	if (
+		normalizedMediaType === 'text/markdown' ||
+		normalizedMediaType === 'text/x-markdown'
+	) {
+		return 'markdown';
+	}
+	if (normalizedMediaType.startsWith('text/')) {
+		return 'text';
+	}
+
+	const extension = fileName.includes('.')
+		? fileName.split('.').pop()?.toLowerCase()
+		: undefined;
+
+	if (extension === 'pdf') {
+		return 'pdf';
+	}
+	if (extension === 'md' || extension === 'markdown') {
+		return 'markdown';
+	}
+	if (extension === 'txt') {
+		return 'text';
+	}
+
+	return undefined;
+}
+
+export function maxBytesForEmbed(
+	mediaKind: EmbedMediaKind,
+	documentFormat?: DocumentFormat,
+): number {
+	const defaultMaxBytes = 100 * 1024 * 1024;
+	const textMaxBytes = 2 * 1024 * 1024;
+
+	if (mediaKind === 'document' && documentFormat !== 'pdf') {
+		return textMaxBytes;
+	}
+
+	return defaultMaxBytes;
 }

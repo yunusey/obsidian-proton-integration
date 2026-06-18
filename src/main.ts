@@ -39,6 +39,7 @@ export default class ObsidianProtonPlugin extends Plugin {
 
 		registerProtonDriveEmbedProcessor(
 			(processor) => this.registerMarkdownPostProcessor(processor),
+			this.app,
 			this.embedResolver,
 		);
 

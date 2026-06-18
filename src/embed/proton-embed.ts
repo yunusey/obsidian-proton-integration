@@ -1,4 +1,9 @@
-import { MarkdownPostProcessorContext, MarkdownRenderChild } from 'obsidian';
+import {
+	App,
+	MarkdownPostProcessorContext,
+	MarkdownRenderer,
+	MarkdownRenderChild,
+} from 'obsidian';
 
 import { ProtonEmbedResolver } from '../proton/embed/resolver';
 import { isProtonDriveUrl } from '../proton/url-parser';
@@ -8,7 +13,9 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 
 	constructor(
 		container: HTMLElement,
+		private readonly app: App,
 		private readonly sourceUrl: string,
+		private readonly notePath: string,
 		private readonly resolver: ProtonEmbedResolver,
 	) {
 		super(container);
@@ -28,9 +35,9 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 
 		switch (result.status) {
 			case 'ready':
-				this.blobUrl = result.blobUrl;
 				this.addCaption(result.fileName);
 				if (result.mediaKind === 'image') {
+					this.blobUrl = result.blobUrl;
 					const img = this.containerEl.createEl('img', {
 						cls: 'proton-drive-embed-image',
 						attr: {
@@ -40,7 +47,8 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 						},
 					});
 					void img;
-				} else {
+				} else if (result.mediaKind === 'video') {
+					this.blobUrl = result.blobUrl;
 					const video = this.containerEl.createEl('video', {
 						cls: 'proton-drive-embed-video',
 						attr: {
@@ -50,16 +58,9 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 						},
 					});
 					void video;
+				} else if (result.mediaKind === 'document') {
+					await this.renderDocument(result);
 				}
-				break;
-
-			case 'document':
-				this.containerEl.addClass('proton-drive-embed-placeholder');
-				this.containerEl.createEl('a', {
-					cls: 'proton-drive-embed-link',
-					text: `${result.fileName} (document preview coming soon)`,
-					href: result.sourceUrl,
-				});
 				break;
 
 			case 'auth-required':
@@ -86,6 +87,51 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 		}
 	}
 
+	private async renderDocument(
+		result: Extract<
+			Awaited<ReturnType<ProtonEmbedResolver['prepareEmbed']>>,
+			{ status: 'ready'; mediaKind: 'document' }
+		>,
+	): Promise<void> {
+		if (result.documentFormat === 'pdf') {
+			if (!result.blobUrl) {
+				return;
+			}
+			this.blobUrl = result.blobUrl;
+			this.containerEl.createEl('iframe', {
+				cls: 'proton-drive-embed-pdf',
+				attr: {
+					src: result.blobUrl,
+					title: result.fileName,
+				},
+			});
+			return;
+		}
+
+		if (!result.textContent) {
+			return;
+		}
+
+		if (result.documentFormat === 'markdown') {
+			const contentEl = this.containerEl.createDiv({
+				cls: 'proton-drive-embed-markdown markdown-preview-view',
+			});
+			await MarkdownRenderer.render(
+				this.app,
+				result.textContent,
+				contentEl,
+				this.notePath,
+				this,
+			);
+			return;
+		}
+
+		this.containerEl.createEl('pre', {
+			cls: 'proton-drive-embed-text',
+			text: result.textContent,
+		});
+	}
+
 	private addCaption(fileName: string): void {
 		this.containerEl.createDiv({
 			cls: 'proton-drive-embed-caption',
@@ -107,6 +153,7 @@ export function registerProtonDriveEmbedProcessor(
 			ctx: MarkdownPostProcessorContext,
 		) => void,
 	) => void,
+	app: App,
 	resolver: ProtonEmbedResolver,
 ): void {
 	register((element, context) => {
@@ -119,7 +166,7 @@ export function registerProtonDriveEmbedProcessor(
 				continue;
 			}
 			seenUrls.add(url);
-			mountEmbed(element, embed, url, context, resolver);
+			mountEmbed(element, embed, url, context, app, resolver);
 		}
 
 		for (const img of element.findAll('img')) {
@@ -132,7 +179,7 @@ export function registerProtonDriveEmbedProcessor(
 			}
 			seenUrls.add(url);
 			const mountPoint = img.closest('.external-embed') ?? img;
-			mountEmbed(element, mountPoint, url, context, resolver);
+			mountEmbed(element, mountPoint, url, context, app, resolver);
 		}
 	});
 }
@@ -142,9 +189,12 @@ function mountEmbed(
 	anchor: Element,
 	url: string,
 	context: MarkdownPostProcessorContext,
+	app: App,
 	resolver: ProtonEmbedResolver,
 ): void {
 	const container = root.createDiv({ cls: 'proton-drive-embed-host' });
 	anchor.replaceWith(container);
-	context.addChild(new ProtonDriveEmbed(container, url, resolver));
+	context.addChild(
+		new ProtonDriveEmbed(container, app, url, context.sourcePath, resolver),
+	);
 }
