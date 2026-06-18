@@ -56,7 +56,7 @@ export function classifyEmbedMedia(
 	fileName: string,
 	nodeType: NodeType,
 ): EmbedMediaKind {
-	if (nodeType !== NodeType.File) {
+	if (nodeType !== NodeType.File && nodeType !== NodeType.Photo) {
 		return 'unsupported';
 	}
 

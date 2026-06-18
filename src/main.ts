@@ -8,6 +8,7 @@ import {
 	getOrCreateClientUid,
 } from './plugin-storage';
 import { registerProtonDriveEmbedProcessor } from './embed/proton-embed';
+import { InsertProtonEmbedModal } from './embed/insert-embed-modal';
 import { ProtonEmbedResolver } from './proton/embed/resolver';
 import { DriveService } from './proton/drive-service';
 import {
@@ -68,6 +69,16 @@ export default class ObsidianProtonPlugin extends Plugin {
 					void this.signOutOfProtonDrive();
 				}
 				return true;
+			},
+		});
+
+		this.addCommand({
+			id: 'insert-proton-drive-embed',
+			name: 'Insert proton drive embed from node uid',
+			editorCallback: (editor) => {
+				new InsertProtonEmbedModal(this.app, (markdown) => {
+					editor.replaceSelection(markdown);
+				}).open();
 			},
 		});
 
