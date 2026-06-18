@@ -10,7 +10,7 @@ Early foundation: browser sign-in, session persistence, and Proton drive link em
 
 ## Requirements
 
-- Obsidian desktop (Electron)
+- Obsidian desktop or mobile
 - A Proton account
 
 ## Development
