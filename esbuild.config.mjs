@@ -25,7 +25,8 @@ const context = await esbuild.context({
 	entryPoints: ['src/main.ts'],
 	bundle: true,
 	alias: {
-		crypto: path.resolve(__dirname, 'crypto-shim.cjs'),
+		crypto: path.resolve(__dirname, 'shims/crypto-shim.cjs'),
+		'node:crypto': path.resolve(__dirname, 'shims/crypto-shim.cjs'),
 	},
 	external: [
 		'obsidian',
