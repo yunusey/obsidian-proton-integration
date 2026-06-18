@@ -1,4 +1,5 @@
 const PROTON_DRIVE_HOST = 'drive.proton.me';
+export const PROTON_DRIVE_PROTOCOL = 'proton-drive:';
 
 const SHARE_FILE_PATTERN =
 	/drive\.proton\.me(?:\/u\/\d+)?\/([^/]+)\/file\/([^/?#]+)/i;
@@ -28,13 +29,24 @@ export type ParsedPublicLinkUrl = {
 	originalUrl: string;
 };
 
+export type ParsedNodeUidUrl = {
+	kind: 'node-uid';
+	nodeUid: string;
+	originalUrl: string;
+};
+
 export type ParsedProtonDriveUrl =
 	| ParsedShareFileUrl
 	| ParsedShareFolderUrl
-	| ParsedPublicLinkUrl;
+	| ParsedPublicLinkUrl
+	| ParsedNodeUidUrl;
 
 export function isProtonDriveUrl(url: string): boolean {
 	return parseProtonDriveUrl(url) !== null;
+}
+
+export function formatProtonDriveNodeUrl(nodeUid: string): string {
+	return `proton-drive://${nodeUid}`;
 }
 
 export function parseProtonDriveUrl(url: string): ParsedProtonDriveUrl | null {
@@ -43,6 +55,10 @@ export function parseProtonDriveUrl(url: string): ParsedProtonDriveUrl | null {
 		parsed = new URL(url);
 	} catch {
 		return null;
+	}
+
+	if (parsed.protocol === PROTON_DRIVE_PROTOCOL) {
+		return parseProtonDriveProtocolUrl(parsed);
 	}
 
 	if (parsed.hostname !== PROTON_DRIVE_HOST) {
@@ -82,4 +98,18 @@ export function parseProtonDriveUrl(url: string): ParsedProtonDriveUrl | null {
 	}
 
 	return null;
+}
+
+function parseProtonDriveProtocolUrl(parsed: URL): ParsedNodeUidUrl | null {
+	const pathSegments = parsed.pathname.split('/').filter(Boolean);
+	const nodeUid = parsed.hostname || pathSegments[0];
+	if (!nodeUid) {
+		return null;
+	}
+
+	return {
+		kind: 'node-uid',
+		nodeUid: decodeURIComponent(nodeUid),
+		originalUrl: parsed.href,
+	};
 }

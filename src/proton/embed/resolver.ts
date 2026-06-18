@@ -1,4 +1,5 @@
 import { NodeEntity, NodeType, ProtonDriveClient } from '@protontech/drive-sdk';
+import { ProtonDrivePhotosClient } from '@protontech/drive-sdk/dist/protonDrivePhotosClient';
 
 import { DriveService } from '../drive-service';
 import { downloadFileToArrayBuffer } from './download';
@@ -50,7 +51,8 @@ export type PreparedEmbed =
 	  };
 
 type FileAccessClient = Pick<
-	ProtonDriveClient,
+	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
+	ProtonDriveClient | ProtonDrivePhotosClient,
 	'getNode' | 'getFileDownloader'
 >;
 
@@ -191,7 +193,7 @@ export class ProtonEmbedResolver {
 			node.type,
 		);
 
-		if (node.type === NodeType.Folder) {
+		if (node.type === NodeType.Folder || node.type === NodeType.Album) {
 			return {
 				nodeUid: node.uid,
 				fileName,
@@ -241,6 +243,13 @@ export class ProtonEmbedResolver {
 	private async getClientForLink(
 		parsed: ParsedProtonDriveUrl,
 	): Promise<{ client: FileAccessClient; nodeUid: string }> {
+		if (parsed.kind === 'node-uid') {
+			const client = await this.driveService.getClientForNodeUid(
+				parsed.nodeUid,
+			);
+			return { client, nodeUid: parsed.nodeUid };
+		}
+
 		const authClient = await this.driveService.getClient();
 
 		if (parsed.kind === 'public-link') {

@@ -28,9 +28,17 @@ Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/p
 
 1. Open **Settings → Obsidian Proton Integration** and click **Sign in**, or run **Sign in to proton drive** from the command palette.
 2. Complete sign-in in your browser when prompted.
-3. Embed a Proton drive file in a note with `![](https://drive.proton.me/...)` in reading view.
+3. Embed a Proton drive file in a note with `![](https://drive.proton.me/...)` in reading view, or use a node UID link such as `![](proton-drive://volumeId~nodeId)` for Photos library items.
 
 Supported embed types: **images**, **videos**, and **documents** (PDF inline preview, plain text, and markdown).
+
+### Photos library embeds
+
+Photos items often do not have a copyable web URL. Use **Insert proton drive embed from node UID** from the command palette, or paste a `proton-drive://` link directly:
+
+```markdown
+![](proton-drive://volumeId~nodeId)
+```
 
 ### Privacy settings
 

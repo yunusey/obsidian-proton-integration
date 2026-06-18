@@ -1,4 +1,5 @@
 import { MemoryCache, ProtonDriveClient } from '@protontech/drive-sdk';
+import { ProtonDrivePhotosClient } from '@protontech/drive-sdk/dist/protonDrivePhotosClient';
 
 import { AccountApi } from './api/account-api';
 import { Addresses } from './api/addresses';
@@ -9,12 +10,20 @@ import { Srp } from './api/srp';
 import { initProtonCrypto } from './crypto';
 import { Credentials, CredentialsStore } from './credentials';
 
+type NodeAccessClient = Pick<
+	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
+	ProtonDriveClient | ProtonDrivePhotosClient,
+	'getNode' | 'getFileDownloader'
+>;
+
 export class DriveService {
 	private credentials: Credentials;
 	private apiClient?: ApiClient;
 	private auth?: Auth;
 	private addresses?: Addresses;
 	private client?: ProtonDriveClient;
+	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
+	private photosClient?: ProtonDrivePhotosClient;
 	private clientUid?: string;
 
 	constructor(
@@ -50,8 +59,28 @@ export class DriveService {
 		return this.client!;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
+	async getPhotosClient(): Promise<ProtonDrivePhotosClient> {
+		if (!this.credentials.isLoggedIn()) {
+			throw new Error('Not signed in to Proton Drive');
+		}
+		await this.ensurePhotosClient();
+		return this.photosClient!;
+	}
+
+	async getClientForNodeUid(nodeUid: string): Promise<NodeAccessClient> {
+		const photosClient = await this.getPhotosClient();
+		try {
+			await photosClient.getNode(nodeUid);
+			return photosClient;
+		} catch {
+			return this.getClient();
+		}
+	}
+
 	async logout(): Promise<void> {
 		this.client = undefined;
+		this.photosClient = undefined;
 		await this.credentials.signOut();
 	}
 
@@ -78,6 +107,31 @@ export class DriveService {
 		const srpModule = new Srp(new AccountApi(this.apiClient!));
 
 		this.client = new ProtonDriveClient({
+			httpClient,
+			entitiesCache: new MemoryCache(),
+			cryptoCache: new MemoryCache(),
+			account: this.addresses!,
+			openPGPCryptoModule,
+			srpModule,
+			config: {
+				clientUid: this.clientUid,
+			},
+		});
+	}
+
+	private async ensurePhotosClient(): Promise<void> {
+		if (this.photosClient) {
+			return;
+		}
+
+		this.ensureApiLayer();
+
+		const openPGPCryptoModule = initProtonCrypto();
+		const httpClient = new HTTPClient(this.apiClient!);
+		const srpModule = new Srp(new AccountApi(this.apiClient!));
+
+		// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
+		this.photosClient = new ProtonDrivePhotosClient({
 			httpClient,
 			entitiesCache: new MemoryCache(),
 			cryptoCache: new MemoryCache(),
