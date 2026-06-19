@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-proton-integration",
 	"name": "Obsidian Proton Integration",
-	"version": "1.0.0",
+	"version": "0.1.0",
 	"minAppVersion": "1.5.0",
 	"description": "Embed Proton Drive files in Obsidian notes.",
 	"author": "yunusey",
