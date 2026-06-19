@@ -28,17 +28,42 @@ Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/p
 
 1. Open **Settings → Obsidian Proton Integration** and click **Sign in**, or run **Sign in to proton drive** from the command palette.
 2. Complete sign-in in your browser when prompted.
-3. Embed a Proton drive file in a note with `![](https://drive.proton.me/...)` in reading view, or use a node UID link such as `![](proton-drive:///volumeId~nodeId)` for Photos library items.
+3. Embed Proton files in reading view (see below).
 
 Supported embed types: **images**, **videos**, and **documents** (PDF inline preview, plain text, and markdown).
 
-### Photos library embeds
+### Node UID links (recommended)
 
-Photos items often do not have a copyable web URL. Use **Insert proton drive embed from node UID** from the command palette, or paste a `proton-drive:///` link directly:
+The plugin supports **`proton-drive:///` links** -- a stable embed format based on Proton’s canonical node UID (`volumeId~nodeId`), not the share ID in a browser URL.
+
+**Why prefer these over `drive.proton.me` links?**
+
+- **Stable:** the UID identifies the file in storage; it does not depend on share context (`shareId`) from the web app.
+- **Works for Photos:** library items often have no copyable web URL; UID links are the supported way to embed them.
+- **Aligned with the SDK:** Proton’s web URLs (`.../shareId/file/nodeId`) are legacy; resolving them uses deprecated SDK APIs (`getNodeUid`) that exist only for backward compatibility with the old web app.
+
+**How to add one**
+
+1. Run **Insert proton drive embed from node uid** from the command palette, paste a UID (`volumeId~nodeId`), and insert the embed; or
+2. Paste a link directly in a note:
 
 ```markdown
 ![](proton-drive:///volumeId~nodeId)
 ```
+
+The plugin URL-encodes the UID in the path (for example, `~` becomes `%7E`).
+
+Works for files in **My files** and the **Photos** library (your own volumes).
+
+### Web share links (legacy)
+
+You can still embed My files items copied from the browser:
+
+```markdown
+![](https://drive.proton.me/.../shareId/file/nodeId)
+```
+
+These rely on deprecated share-ID resolution in the SDK and may break as Proton moves to volume-based navigation. They do **not** work for Photos library items. Prefer **`proton-drive:///`** links when you can.
 
 ### Privacy settings
 
