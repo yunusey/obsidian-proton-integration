@@ -101,15 +101,18 @@ export function parseProtonDriveUrl(url: string): ParsedProtonDriveUrl | null {
 }
 
 function parseProtonDriveProtocolUrl(parsed: URL): ParsedNodeUidUrl | null {
+	if (parsed.hostname) {
+		return null;
+	}
+
 	const pathSegments = parsed.pathname.split('/').filter(Boolean);
-	const nodeUid = pathSegments[0] || parsed.hostname;
-	if (!nodeUid) {
+	if (pathSegments.length !== 1) {
 		return null;
 	}
 
 	let decoded: string;
 	try {
-		decoded = decodeURIComponent(nodeUid);
+		decoded = decodeURIComponent(pathSegments[0]!);
 	} catch {
 		return null;
 	}
