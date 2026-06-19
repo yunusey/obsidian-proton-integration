@@ -1,6 +1,6 @@
 import { VERSION as SDK_VERSION } from '@protontech/drive-sdk';
 
-export const PLUGIN_VERSION = '1.0.0';
+export const PLUGIN_VERSION = '0.1.0';
 
 /** Required x-pm-appversion format for third-party Drive clients. */
 export const APP_VERSION = `external-drive-obsidian_integration@${PLUGIN_VERSION}-stable`;

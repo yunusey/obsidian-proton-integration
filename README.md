@@ -96,7 +96,7 @@ The SDK handles encrypted drive operations once `ProtonDriveClient` is construct
 
 This plugin identifies itself to Proton APIs as:
 
-`external-drive-obsidian_integration@1.0.0-stable`
+`external-drive-obsidian_integration@0.1.0-stable`
 
 Per [Proton's SDK usage guidelines](https://github.com/ProtonDriveApps/sdk#usage-guidelines-for-personal-projects), third-party apps must not use Proton branding and must disclose that credentials are entered into an unofficial application.
 
