@@ -46,7 +46,7 @@ export function isProtonDriveUrl(url: string): boolean {
 }
 
 export function formatProtonDriveNodeUrl(nodeUid: string): string {
-	return `proton-drive://${encodeURIComponent(nodeUid)}`;
+	return `proton-drive:///${encodeURIComponent(nodeUid)}`;
 }
 
 export function parseProtonDriveUrl(url: string): ParsedProtonDriveUrl | null {
@@ -102,7 +102,7 @@ export function parseProtonDriveUrl(url: string): ParsedProtonDriveUrl | null {
 
 function parseProtonDriveProtocolUrl(parsed: URL): ParsedNodeUidUrl | null {
 	const pathSegments = parsed.pathname.split('/').filter(Boolean);
-	const nodeUid = parsed.hostname || pathSegments[0];
+	const nodeUid = pathSegments[0] || parsed.hostname;
 	if (!nodeUid) {
 		return null;
 	}
