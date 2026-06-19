@@ -83,7 +83,7 @@ export class DriveService {
 		}
 
 		throw new Error(
-			'Unsupported Proton volume. Use a "Photos" or "My files" node UID, or embed a share link instead.',
+			'Unsupported Proton volume: use a "Photos" or "My files" node UID, or embed a share link instead',
 		);
 	}
 
