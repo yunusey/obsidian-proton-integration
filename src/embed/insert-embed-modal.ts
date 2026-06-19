@@ -19,7 +19,7 @@ export class InsertProtonEmbedModal extends Modal {
 
 		contentEl.createEl('h2', { text: 'Insert proton drive embed' });
 		contentEl.createEl('p', {
-			text: 'Paste a proton node UID (`volumeId~nodeId`). This creates a `proton-drive://` link that works for photos library items.',
+			text: 'Paste a proton node UID (`volumeId~nodeId`). This creates a `proton-drive:///...` link that works for photos library items.',
 		});
 
 		// eslint-disable-next-line obsidianmd/ui/sentence-case -- Proton SDK identifier format
