@@ -19,23 +19,23 @@ export class InsertProtonEmbedModal extends Modal {
 
 		contentEl.createEl('h2', { text: 'Insert proton drive embed' });
 		contentEl.createEl('p', {
-			text: 'Paste a proton node uid (`volumeId~nodeId`). This creates a `proton-drive://` link that works for photos library items.',
+			text: 'Paste a proton node UID (`volumeId~nodeId`). This creates a `proton-drive://` link that works for photos library items.',
 		});
 
-		new Setting(contentEl)
-			.setName('Node uid')
-			.addText((text) => {
-				text.setPlaceholder('Volumeid~nodeid');
-				text.onChange((value) => {
-					this.nodeUid = value.trim();
-				});
-				text.inputEl.addEventListener('keydown', (event) => {
-					if (event.key === 'Enter') {
-						event.preventDefault();
-						this.submit();
-					}
-				});
+		// eslint-disable-next-line obsidianmd/ui/sentence-case -- Proton SDK identifier format
+		new Setting(contentEl).setName('Node UID').addText((text) => {
+			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Proton SDK identifier format
+			text.setPlaceholder('volumeId~nodeId');
+			text.onChange((value) => {
+				this.nodeUid = value.trim();
 			});
+			text.inputEl.addEventListener('keydown', (event) => {
+				if (event.key === 'Enter') {
+					event.preventDefault();
+					this.submit();
+				}
+			});
+		});
 
 		new Setting(contentEl).addButton((button) => {
 			button
@@ -60,7 +60,7 @@ export class InsertProtonEmbedModal extends Modal {
 			// The return value is ignored--used for validation only
 			parseNodeUid(this.nodeUid);
 		} catch {
-			new Notice('Invalid node uid. Expected volumeid~nodeid.');
+			new Notice('Invalid node UID. Expected `volumeId~nodeId`.');
 			return;
 		}
 
