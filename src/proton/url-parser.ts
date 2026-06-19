@@ -107,9 +107,16 @@ function parseProtonDriveProtocolUrl(parsed: URL): ParsedNodeUidUrl | null {
 		return null;
 	}
 
+	let decoded: string;
+	try {
+		decoded = decodeURIComponent(nodeUid);
+	} catch {
+		return null;
+	}
+
 	return {
 		kind: 'node-uid',
-		nodeUid: decodeURIComponent(nodeUid),
+		nodeUid: decoded,
 		originalUrl: parsed.href,
 	};
 }
