@@ -89,7 +89,7 @@ export class ProtonEmbedResolver {
 		}
 
 		try {
-			const fileInfo = await this.resolveFileInfo(parsed);
+			const { fileInfo, client } = await this.resolveFileInfo(parsed);
 			if (fileInfo.mediaKind === 'unsupported') {
 				return {
 					status: 'unsupported',
@@ -114,8 +114,8 @@ export class ProtonEmbedResolver {
 				}
 
 				const blob = await this.getOrDownloadBlob(
-					parsed,
 					fileInfo,
+					client,
 					documentFormat,
 				);
 				const mediaType =
@@ -149,7 +149,7 @@ export class ProtonEmbedResolver {
 				};
 			}
 
-			const blob = await this.getOrDownloadBlob(parsed, fileInfo);
+			const blob = await this.getOrDownloadBlob(fileInfo, client);
 			const blobUrl = URL.createObjectURL(blob);
 
 			return {
@@ -176,10 +176,13 @@ export class ProtonEmbedResolver {
 
 	private async resolveFileInfo(
 		parsed: ParsedProtonDriveUrl,
-	): Promise<EmbedFileInfo> {
+	): Promise<{ fileInfo: EmbedFileInfo; client: FileAccessClient }> {
 		const { client, nodeUid } = await this.getClientForLink(parsed);
 		const node = await client.getNode(nodeUid);
-		return this.toEmbedFileInfo(node, parsed.originalUrl);
+		return {
+			fileInfo: this.toEmbedFileInfo(node, parsed.originalUrl),
+			client,
+		};
 	}
 
 	private toEmbedFileInfo(
@@ -213,8 +216,8 @@ export class ProtonEmbedResolver {
 	}
 
 	private async getOrDownloadBlob(
-		parsed: ParsedProtonDriveUrl,
 		fileInfo: EmbedFileInfo,
+		client: FileAccessClient,
 		documentFormat?: DocumentFormat,
 	): Promise<Blob> {
 		const cached = this.blobCache.get(fileInfo.nodeUid);
@@ -222,7 +225,6 @@ export class ProtonEmbedResolver {
 			return cached;
 		}
 
-		const { client } = await this.getClientForLink(parsed);
 		const downloader = await client.getFileDownloader(fileInfo.nodeUid);
 		const data = await downloadFileToArrayBuffer(
 			downloader,
