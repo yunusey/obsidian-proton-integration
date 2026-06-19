@@ -9,6 +9,7 @@ import { HTTPClient } from './api/http-client';
 import { Srp } from './api/srp';
 import { initProtonCrypto } from './crypto';
 import { Credentials, CredentialsStore } from './credentials';
+import { parseNodeUid } from './node-uid';
 
 type NodeAccessClient = Pick<
 	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
@@ -25,6 +26,8 @@ export class DriveService {
 	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
 	private photosClient?: ProtonDrivePhotosClient;
 	private clientUid?: string;
+	private photosVolumeId?: string;
+	private driveVolumeId?: string;
 
 	constructor(
 		private readonly credentialsStore: CredentialsStore,
@@ -69,19 +72,43 @@ export class DriveService {
 	}
 
 	async getClientForNodeUid(nodeUid: string): Promise<NodeAccessClient> {
-		const photosClient = await this.getPhotosClient();
-		try {
-			await photosClient.getNode(nodeUid);
-			return photosClient;
-		} catch {
+		await this.ensureVolumeIds();
+		const { volumeId } = parseNodeUid(nodeUid);
+
+		if (volumeId === this.photosVolumeId) {
+			return this.getPhotosClient();
+		}
+		if (volumeId === this.driveVolumeId) {
 			return this.getClient();
 		}
+
+		throw new Error(
+			'Unsupported Proton volume. Use a photos or my files node uid, or embed a share link instead.',
+		);
 	}
 
 	async logout(): Promise<void> {
 		this.client = undefined;
 		this.photosClient = undefined;
+		this.photosVolumeId = undefined;
+		this.driveVolumeId = undefined;
 		await this.credentials.signOut();
+	}
+
+	private async ensureVolumeIds(): Promise<void> {
+		if (this.photosVolumeId && this.driveVolumeId) {
+			return;
+		}
+
+		const photosClient = await this.getPhotosClient();
+		const driveClient = await this.getClient();
+		const [photosRoot, driveRoot] = await Promise.all([
+			photosClient.getMyPhotosRootFolder(),
+			driveClient.getMyFilesRootFolder(),
+		]);
+
+		this.photosVolumeId = parseNodeUid(photosRoot.uid).volumeId;
+		this.driveVolumeId = parseNodeUid(driveRoot.uid).volumeId;
 	}
 
 	private ensureApiLayer(): void {
