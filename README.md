@@ -104,6 +104,16 @@ This plugin identifies itself to Proton APIs as:
 
 Per [Proton's SDK usage guidelines](https://github.com/ProtonDriveApps/sdk#usage-guidelines-for-personal-projects), third-party apps must not use Proton branding and must disclose that credentials are entered into an unofficial application.
 
+## AI disclosure
+
+This project has used AI tools during development, and this section explains how.
+
+During the early foundation stage, [Cursor](https://cursor.com) (Pro) was used to move quickly and explore implementations. Each change was reviewed manually to the best of my ability before landing. Going forward, the focus shifts toward slower, smaller changes; I expect the project's own stability to improve as a result.
+
+That said, stability also depends on upstream: the Proton Drive SDK is still evolving and can change without much notice. This plugin cannot promise a stable or backwards-compatible experience anytime soon, regardless of how carefully changes are reviewed here.
+
+For pull requests, I review every change myself first. After that, I also run [GitHub Copilot](https://github.com/features/copilot) code review on the PR. Those review comments are public on GitHub. I rely on this extra pass mainly because I am the sole maintainer of the project for now.
+
 ## License
 
 MIT
