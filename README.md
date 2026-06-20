@@ -4,7 +4,7 @@ Bridge between [Obsidian](https://obsidian.md) and [Proton Drive](https://proton
 
 ## Status
 
-Early foundation: browser sign-in, session persistence, and Proton drive link embeds in reading view.
+Early foundation: browser sign-in, optional session persistence, and Proton drive link embeds in reading view.
 
 > **Note:** The Proton Drive SDK is still evolving and does not yet ship standalone auth. This plugin implements the same auth/API wiring pattern used by the [official Drive CLI](https://github.com/ProtonDriveApps/sdk/tree/main/js/cli).
 
@@ -67,7 +67,9 @@ These rely on deprecated share-ID resolution in the SDK and may break as Proton 
 
 ### Privacy settings
 
-- **Keep credentials in memory only:** sign-in data is not written to Obsidian plugin storage; you sign in again after each Obsidian restart.
+- **Keep credentials in memory only:** sign-in data is not written to Obsidian plugin storage; you sign in again after each Obsidian restart. Because Proton is known for its stance “Privacy by default”, this is the default behavior.
+
+  If you would like your session to persist across Obsidian sessions, you can disable this option. However, please keep in mind that doing so will write your credentials to `.obsidian/plugins/obsidian-proton-integration/data.json`, unencrypted. **Do not share this file, and do not add it to version control.**
 
 ## Architecture
 

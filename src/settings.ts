@@ -9,7 +9,7 @@ export interface PluginSettings {
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
-	credentialsInMemoryOnly: false,
+	credentialsInMemoryOnly: true, /* privacy by default :) */
 };
 
 export class ProtonSettingTab extends PluginSettingTab {
@@ -48,7 +48,7 @@ export class ProtonSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Keep credentials in memory only')
 			.setDesc(
-				'Do not write sign-in data to Obsidian plugin storage. You will need to sign in again after restarting Obsidian.',
+				'Do not write sign-in data to Obsidian plugin storage. You will need to sign in again after restarting Obsidian. On by default.',
 			)
 			.addToggle((toggle) =>
 				toggle
