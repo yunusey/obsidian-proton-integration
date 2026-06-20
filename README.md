@@ -1,12 +1,13 @@
 # Obsidian Proton Integration Plugin
 
-Bridge between [Obsidian](https://obsidian.md) and [Proton Drive](https://proton.me/drive), built on the official [`@protontech/drive-sdk`](https://www.npmjs.com/package/@protontech/drive-sdk).
+Bridge between [Obsidian](https://obsidian.md) and [Proton Drive](https://proton.me/drive), built on the official [`@protontech/drive-sdk`](https://www.npmjs.com/package/@protontech/drive-sdk). This is an independent project and is **not affiliated with, endorsed by, or sponsored by Proton AG** or any of its products.
 
 ## Status
 
 Early foundation: browser sign-in, optional session persistence, and Proton drive link embeds in reading view.
 
-> **Note:** The Proton Drive SDK is still evolving and does not yet ship standalone auth. This plugin implements the same auth/API wiring pattern used by the [official Drive CLI](https://github.com/ProtonDriveApps/sdk/tree/main/js/cli).
+> [!CAUTION]
+> The Proton Drive SDK is still evolving and does not yet ship standalone auth. This plugin implements the same auth/API wiring pattern used by the [official Drive CLI](https://github.com/ProtonDriveApps/sdk/tree/main/js/cli).
 
 ## Requirements
 
