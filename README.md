@@ -65,11 +65,13 @@ You can still embed My files items copied from the browser:
 
 These rely on deprecated share-ID resolution in the SDK and may break as Proton moves to volume-based navigation. They do **not** work for Photos library items. Prefer **`proton-drive:///`** links when you can.
 
-### Privacy settings
+### Privacy and local storage
 
-- **Keep credentials in memory only:** sign-in data is not written to Obsidian plugin storage; you sign in again after each Obsidian restart. Because Proton is known for its stance “Privacy by default”, this is the default behavior.
+- **Keep credentials in memory only:** sign-in data is not written to Obsidian plugin storage; you sign in again after each Obsidian restart. Because Proton is known for its stance "Privacy by default", this is the default behavior.
 
   If you would like your session to persist across Obsidian sessions, you can disable this option. However, please keep in mind that doing so will write your credentials to `.obsidian/plugins/obsidian-proton-integration/data.json`, unencrypted. **Do not share this file, and do not add it to version control.**
+
+- **Client UID:** the plugin also stores a random `protonClientUid` in `data.json`. This is required by the Proton Drive SDK to identify this Obsidian installation (for upload/sync state on Proton's side). It is not a credential, is not tied to your Proton identity, and is always persisted, even when "Keep credentials in memory only" is enabled. If you are not using session persistence, `data.json` contains only this UID. You can safely share it or add it to version control. Deleting it will cause a new one to be generated on next launch.
 
 ## Architecture
 
