@@ -22,10 +22,8 @@ export class InsertProtonEmbedModal extends Modal {
 			text: 'Paste a proton node UID (`volumeId~nodeId`). This creates a `proton-drive:///...` link.',
 		});
 
-		// eslint-disable-next-line obsidianmd/ui/sentence-case -- Proton SDK identifier format
 		new Setting(contentEl).setName('Node UID').addText((text) => {
-			// eslint-disable-next-line obsidianmd/ui/sentence-case -- Proton SDK identifier format
-			text.setPlaceholder('volumeId~nodeId');
+			text.setPlaceholder('Paste your UID here in the format `volumeId~nodeId`');
 			text.onChange((value) => {
 				this.nodeUid = value.trim();
 			});

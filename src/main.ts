@@ -74,7 +74,7 @@ export default class ObsidianProtonPlugin extends Plugin {
 
 		this.addCommand({
 			id: 'insert-proton-drive-embed',
-			name: 'Insert proton drive embed from node uid',
+			name: 'Insert proton drive embed from node UID',
 			editorCallback: (editor) => {
 				new InsertProtonEmbedModal(this.app, (markdown) => {
 					editor.replaceSelection(markdown);
