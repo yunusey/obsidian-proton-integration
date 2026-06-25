@@ -1,4 +1,4 @@
-# Obsidian Proton Integration Plugin
+# Proton Drive Integration
 
 Bridge between [Obsidian](https://obsidian.md) and [Proton Drive](https://proton.me/drive), built on the official [`@protontech/drive-sdk`](https://www.npmjs.com/package/@protontech/drive-sdk). This is an independent project and is **not affiliated with, endorsed by, or sponsored by Proton AG** or any of its products.
 
