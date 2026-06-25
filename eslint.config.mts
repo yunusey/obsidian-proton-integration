@@ -1,34 +1,38 @@
-import tseslint from 'typescript-eslint';
-import obsidianmd from 'eslint-plugin-obsidianmd';
-import globals from 'globals';
-import { globalIgnores } from 'eslint/config';
+import tsparser from "@typescript-eslint/parser";
+import { defineConfig, globalIgnores } from "eslint/config";
+import obsidianmd from "eslint-plugin-obsidianmd";
 
-export default tseslint.config(
+export default defineConfig([
+	...obsidianmd.configs.recommended,
 	globalIgnores([
-		'node_modules',
-		'dist',
-		'shims',
-		'esbuild.config.mjs',
-		'version-bump.mjs',
-		'versions.json',
-		'main.js',
-		'package.json',
-		'package-lock.json',
-		'tsconfig.json',
+		"node_modules",
+		"dist",
+		"shims",
+		"esbuild.config.mjs",
+		"version-bump.mjs",
+		"versions.json",
+		"main.js",
+		"package.json",
+		"package-lock.json",
+		"tsconfig.json",
 	]),
 	{
+		files: ["**/*.ts"],
 		languageOptions: {
-			globals: {
-				...globals.browser,
-			},
+			parser: tsparser,
 			parserOptions: {
-				projectService: {
-					allowDefaultProject: ['eslint.config.mts', 'manifest.json'],
-				},
+				project: "./tsconfig.json",
 				tsconfigRootDir: import.meta.dirname,
-				extraFileExtensions: ['.json'],
 			},
 		},
+		rules: {
+			"obsidianmd/ui/sentence-case": [
+				"error",
+				{
+					acronyms: ["UID"],
+					enforceCamelCaseLower: true,
+				},
+			],
+		},
 	},
-	...obsidianmd.configs.recommended,
-);
+]);
