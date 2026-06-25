@@ -3,7 +3,7 @@
 	"name": "Proton Drive Integration",
 	"version": "0.1.0",
 	"minAppVersion": "1.5.0",
-	"description": "Embed Proton Drive files in Obsidian notes.",
+	"description": "Embed Proton Drive files into your vault.",
 	"author": "yunusey",
 	"isDesktopOnly": false
 }
