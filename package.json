@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-proton-integration",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "The bridge between Obsidian and Proton Drive.",
 	"main": "main.js",
 	"type": "module",
