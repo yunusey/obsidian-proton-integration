@@ -26,6 +26,18 @@ export default defineConfig([
 			},
 		},
 		rules: {
+			"@typescript-eslint/no-deprecated": [
+				"error",
+				{
+					allow: [
+						{
+							from: "package",
+							package: "@protontech/drive-sdk",
+							name: ["ProtonDrivePhotosClient", "getNodeUid"],
+						},
+					],
+				},
+			],
 			"obsidianmd/ui/sentence-case": [
 				"error",
 				{

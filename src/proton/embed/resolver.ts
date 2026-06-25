@@ -51,7 +51,6 @@ export type PreparedEmbed =
 	  };
 
 type FileAccessClient = Pick<
-	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
 	ProtonDriveClient | ProtonDrivePhotosClient,
 	'getNode' | 'getFileDownloader'
 >;
@@ -274,7 +273,6 @@ export class ProtonEmbedResolver {
 			return { client: publicClient, nodeUid: root.uid };
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-deprecated -- share URLs still require deprecated getNodeUid
 		const nodeUid = await authClient.getNodeUid(
 			parsed.shareId,
 			parsed.nodeId,
