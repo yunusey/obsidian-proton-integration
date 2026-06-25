@@ -112,8 +112,10 @@ function concatUint8Arrays(...arrays: Uint8Array[]): Uint8Array {
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
-	return bytes.buffer.slice(
-		bytes.byteOffset,
-		bytes.byteOffset + bytes.byteLength,
-	) as ArrayBuffer;
+	const { buffer, byteOffset, byteLength } = bytes;
+	if (buffer instanceof ArrayBuffer) {
+		return buffer.slice(byteOffset, byteOffset + byteLength);
+	}
+
+	return bytes.slice().buffer;
 }
