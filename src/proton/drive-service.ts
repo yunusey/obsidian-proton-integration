@@ -12,7 +12,6 @@ import { Credentials, CredentialsStore } from './credentials';
 import { parseNodeUid } from './node-uid';
 
 type NodeAccessClient = Pick<
-	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
 	ProtonDriveClient | ProtonDrivePhotosClient,
 	'getNode' | 'getFileDownloader'
 >;
@@ -23,7 +22,6 @@ export class DriveService {
 	private auth?: Auth;
 	private addresses?: Addresses;
 	private client?: ProtonDriveClient;
-	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
 	private photosClient?: ProtonDrivePhotosClient;
 	private clientUid?: string;
 	private photosVolumeId?: string;
@@ -62,7 +60,6 @@ export class DriveService {
 		return this.client!;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
 	async getPhotosClient(): Promise<ProtonDrivePhotosClient> {
 		if (!this.credentials.isLoggedIn()) {
 			throw new Error('Not signed in to Proton Drive');
@@ -157,7 +154,6 @@ export class DriveService {
 		const httpClient = new HTTPClient(this.apiClient!);
 		const srpModule = new Srp(new AccountApi(this.apiClient!));
 
-		// eslint-disable-next-line @typescript-eslint/no-deprecated -- photos nodes use experimental SDK client
 		this.photosClient = new ProtonDrivePhotosClient({
 			httpClient,
 			entitiesCache: new MemoryCache(),
