@@ -274,8 +274,7 @@ export class ProtonEmbedResolver {
 			return { client: publicClient, nodeUid: root.uid };
 		}
 
-		// SDK maps share URLs to node UIDs via shareId + nodeId.
-		// eslint-disable-next-line @typescript-eslint/no-deprecated
+		// eslint-disable-next-line @typescript-eslint/no-deprecated -- share URLs still require deprecated getNodeUid
 		const nodeUid = await authClient.getNodeUid(
 			parsed.shareId,
 			parsed.nodeId,
