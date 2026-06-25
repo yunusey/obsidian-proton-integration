@@ -1,9 +1,6 @@
 import { Plugin } from 'obsidian';
 
-import {
-	CredentialsStore,
-	StoredCredentials,
-} from './proton/credentials';
+import { CredentialsStore, StoredCredentials } from './proton/credentials';
 
 const CREDENTIALS_DATA_KEY = 'protonCredentials';
 const CLIENT_UID_DATA_KEY = 'protonClientUid';
@@ -25,16 +22,20 @@ export class PluginCredentialStore implements CredentialsStore {
 
 	async save(credentials: StoredCredentials): Promise<void> {
 		const data =
-			((await this.plugin.loadData()) as Record<string, unknown> | null) ??
-			{};
+			((await this.plugin.loadData()) as Record<
+				string,
+				unknown
+			> | null) ?? {};
 		data[CREDENTIALS_DATA_KEY] = credentials;
 		await this.plugin.saveData(data);
 	}
 
 	async remove(): Promise<void> {
 		const data =
-			((await this.plugin.loadData()) as Record<string, unknown> | null) ??
-			{};
+			((await this.plugin.loadData()) as Record<
+				string,
+				unknown
+			> | null) ?? {};
 		delete data[CREDENTIALS_DATA_KEY];
 		await this.plugin.saveData(data);
 	}
@@ -64,9 +65,7 @@ export function createCredentialStore(
 	};
 }
 
-export async function clearPersistedCredentials(
-	plugin: Plugin,
-): Promise<void> {
+export async function clearPersistedCredentials(plugin: Plugin): Promise<void> {
 	await new PluginCredentialStore(plugin).remove();
 }
 

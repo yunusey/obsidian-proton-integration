@@ -5,7 +5,11 @@ import {
 	SDK_VERSION_STRING,
 } from '../constants';
 import { Credentials } from '../credentials';
-import { isOkResponse, protonRequest, ProtonHttpResponse } from './obsidian-http';
+import {
+	isOkResponse,
+	protonRequest,
+	ProtonHttpResponse,
+} from './obsidian-http';
 
 export interface ApiRequestOptions {
 	method?: string;
@@ -84,7 +88,10 @@ export class ApiClient {
 				headers.set('x-pm-uid', this.credentials.uid);
 			}
 			if (this.credentials.accessToken) {
-				headers.set('Authorization', `Bearer ${this.credentials.accessToken}`);
+				headers.set(
+					'Authorization',
+					`Bearer ${this.credentials.accessToken}`,
+				);
 			}
 		}
 

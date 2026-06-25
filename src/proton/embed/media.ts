@@ -34,9 +34,7 @@ const VIDEO_EXTENSIONS = new Set([
 
 const DOCUMENT_EXTENSIONS = new Set(['pdf', 'txt', 'md', 'markdown']);
 
-export function getNodeDisplayName(
-	name: Result<string, unknown>,
-): string {
+export function getNodeDisplayName(name: Result<string, unknown>): string {
 	if (name.ok) {
 		return name.value;
 	}

@@ -9,7 +9,8 @@ export function initProtonCrypto(): OpenPGPCryptoWithCryptoProxy {
 		CryptoApi.init({});
 		CryptoProxy.setEndpoint(
 			new CryptoApi(),
-			(endpoint: { clearKeyStore: () => void }) => endpoint.clearKeyStore(),
+			(endpoint: { clearKeyStore: () => void }) =>
+				endpoint.clearKeyStore(),
 		);
 		initialized = true;
 	}

@@ -5,8 +5,7 @@ const SHARE_FILE_PATTERN =
 	/drive\.proton\.me(?:\/u\/\d+)?\/([^/]+)\/file\/([^/?#]+)/i;
 const SHARE_FOLDER_PATTERN =
 	/drive\.proton\.me(?:\/u\/\d+)?\/([^/]+)\/folder\/([^/?#]+)/i;
-const PUBLIC_LINK_PATTERN =
-	/drive\.proton\.me\/urls\/([^/#?]+)#([^?]*)/i;
+const PUBLIC_LINK_PATTERN = /drive\.proton\.me\/urls\/([^/#?]+)#([^?]*)/i;
 
 export type ParsedShareFileUrl = {
 	kind: 'share-file';

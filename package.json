@@ -9,7 +9,9 @@
 		"build": "node esbuild.config.mjs production",
 		"typecheck": "tsc -noEmit -skipLibCheck",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
 	},
 	"keywords": [],
 	"license": "MIT",
@@ -18,10 +20,12 @@
 		"@types/node": "^22.15.17",
 		"esbuild": "0.25.5",
 		"eslint": "^9.39.4",
+		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-obsidianmd": "^0.3.0",
 		"globals": "^17.6.0",
 		"jiti": "^2.6.1",
 		"obsidian": "latest",
+		"prettier": "^3.8.4",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.59.1"
 	},

@@ -26,7 +26,10 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 	}
 
 	private async loadEmbed(): Promise<void> {
-		this.containerEl.addClass('proton-drive-embed', 'proton-drive-embed-loading');
+		this.containerEl.addClass(
+			'proton-drive-embed',
+			'proton-drive-embed-loading',
+		);
 		this.containerEl.setText('Loading from proton drive…');
 
 		const result = await this.resolver.prepareEmbed(this.sourceUrl);
