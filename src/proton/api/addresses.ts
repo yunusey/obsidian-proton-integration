@@ -220,10 +220,11 @@ export class Addresses {
 					continue;
 				}
 
-				const userPrimaryPrivateKey = await CryptoProxy.importPrivateKey({
-					armoredKey: userKey.PrivateKey,
-					passphrase: userKeyPassword,
-				});
+				const userPrimaryPrivateKey =
+					await CryptoProxy.importPrivateKey({
+						armoredKey: userKey.PrivateKey,
+						passphrase: userKeyPassword,
+					});
 
 				const userPrimaryPublicKey = await CryptoProxy.importPublicKey({
 					binaryKey: await CryptoProxy.exportPublicKey({
@@ -372,7 +373,8 @@ export class Addresses {
 			};
 		} catch (error) {
 			this.addressKeysByKeyIdPromises.delete(keyId);
-			const detail = error instanceof Error ? error.message : String(error);
+			const detail =
+				error instanceof Error ? error.message : String(error);
 			throw new Error(
 				`Error loading address key ${keyId} for ${email ?? 'unknown'}: ${detail}`,
 			);

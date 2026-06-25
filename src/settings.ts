@@ -9,7 +9,7 @@ export interface PluginSettings {
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
-	credentialsInMemoryOnly: true, /* privacy by default :) */
+	credentialsInMemoryOnly: true /* privacy by default :) */,
 };
 
 export class ProtonSettingTab extends PluginSettingTab {

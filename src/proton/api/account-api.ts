@@ -106,7 +106,9 @@ export class AccountApi {
 			}
 			const body = response.json as AuthInfoResponse;
 			if (!body.Modulus) {
-				throw new AccountApiError('Invalid auth response', { debug: body });
+				throw new AccountApiError('Invalid auth response', {
+					debug: body,
+				});
 			}
 			return body;
 		} catch (error: unknown) {
@@ -114,7 +116,9 @@ export class AccountApi {
 		}
 	}
 
-	async users(): Promise<{ User?: { Keys?: Array<{ PrivateKey?: string }> } }> {
+	async users(): Promise<{
+		User?: { Keys?: Array<{ PrivateKey?: string }> };
+	}> {
 		try {
 			const response = await this.apiClient.authenticatedRequest(
 				`${this.apiClient.baseUrlWithProtocol}/core/v4/users`,

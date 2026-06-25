@@ -11,11 +11,7 @@ import { registerProtonDriveEmbedProcessor } from './embed/proton-embed';
 import { InsertProtonEmbedModal } from './embed/insert-embed-modal';
 import { ProtonEmbedResolver } from './proton/embed/resolver';
 import { DriveService } from './proton/drive-service';
-import {
-	DEFAULT_SETTINGS,
-	PluginSettings,
-	ProtonSettingTab,
-} from './settings';
+import { DEFAULT_SETTINGS, PluginSettings, ProtonSettingTab } from './settings';
 
 export default class ObsidianProtonPlugin extends Plugin {
 	settings!: PluginSettings;
@@ -106,7 +102,9 @@ export default class ObsidianProtonPlugin extends Plugin {
 	async signInToProtonDrive(): Promise<void> {
 		const modal = new ProtonSignInModal(this.app, async (signInUrl) => {
 			window.open(signInUrl, '_blank');
-			new Notice('Complete sign-in in your browser, then return to Obsidian.');
+			new Notice(
+				'Complete sign-in in your browser, then return to Obsidian.',
+			);
 		});
 
 		try {
@@ -136,7 +134,9 @@ class ProtonSignInModal extends Modal {
 
 	constructor(
 		app: ObsidianProtonPlugin['app'],
-		private readonly onSignInUrl: (signInUrl: string) => void | Promise<void>,
+		private readonly onSignInUrl: (
+			signInUrl: string,
+		) => void | Promise<void>,
 	) {
 		super(app);
 	}
@@ -152,7 +152,9 @@ class ProtonSignInModal extends Modal {
 			text: 'Click the button below to open proton sign-in in your browser.',
 		});
 
-		const button = contentEl.createEl('button', { text: 'Open sign-in page' });
+		const button = contentEl.createEl('button', {
+			text: 'Open sign-in page',
+		});
 		button.addEventListener('click', () => {
 			void this.openSignInPage();
 		});

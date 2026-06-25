@@ -31,29 +31,35 @@ export class HTTPClient {
 	async fetchJson(
 		options: ProtonDriveHTTPClientJsonRequest,
 	): Promise<Response> {
-		const response = await this.apiClient.authenticatedRequest(options.url, {
-			method: options.method,
-			...(options.json !== undefined ? { json: options.json } : {}),
-			...(options.body !== undefined && options.json === undefined
-				? { body: options.body }
-				: {}),
-			headers: options.headers,
-			timeout: options.timeoutMs,
-			signal: options.signal,
-		});
+		const response = await this.apiClient.authenticatedRequest(
+			options.url,
+			{
+				method: options.method,
+				...(options.json !== undefined ? { json: options.json } : {}),
+				...(options.body !== undefined && options.json === undefined
+					? { body: options.body }
+					: {}),
+				headers: options.headers,
+				timeout: options.timeoutMs,
+				signal: options.signal,
+			},
+		);
 		return toFetchResponse(response);
 	}
 
 	async fetchBlob(
 		options: ProtonDriveHTTPClientBlobRequest,
 	): Promise<Response> {
-		const response = await this.apiClient.authenticatedRequest(options.url, {
-			method: options.method,
-			body: options.body,
-			headers: options.headers,
-			timeout: options.timeoutMs,
-			signal: options.signal,
-		});
+		const response = await this.apiClient.authenticatedRequest(
+			options.url,
+			{
+				method: options.method,
+				body: options.body,
+				headers: options.headers,
+				timeout: options.timeoutMs,
+				signal: options.signal,
+			},
+		);
 		return toFetchResponse(response);
 	}
 }
