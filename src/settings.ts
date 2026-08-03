@@ -1,4 +1,9 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import {
+	App,
+	PluginSettingTab,
+	Setting,
+	SettingDefinitionItem,
+} from 'obsidian';
 
 import { clearPersistedCredentials } from './plugin-storage';
 import ObsidianProtonPlugin from './main';
@@ -20,12 +25,75 @@ export class ProtonSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
+	/**
+	 * Obsidian 1.13.0+: declarative definitions for settings search and auto-save.
+	 * {@link display} remains as a fallback for older Obsidian versions.
+	 */
+	getSettingDefinitions(): SettingDefinitionItem<'credentialsInMemoryOnly'>[] {
+		return [
+			{
+				name: 'Account status',
+				desc: this.getAccountStatusDescription(),
+				render: (setting) => {
+					setting.addButton((button) => {
+						if (this.plugin.driveService.isLoggedIn()) {
+							button
+								.setButtonText('Sign out')
+								.onClick(async () => {
+									await this.plugin.signOutOfProtonDrive();
+									// eslint-disable-next-line obsidianmd/no-unsupported-api -- only reached on Obsidian 1.13+
+									this.update();
+								});
+						} else {
+							button
+								.setButtonText('Sign in')
+								.onClick(async () => {
+									await this.plugin.signInToProtonDrive();
+									// eslint-disable-next-line obsidianmd/no-unsupported-api -- only reached on Obsidian 1.13+
+									this.update();
+								});
+						}
+					});
+				},
+			},
+			{
+				name: 'Keep credentials in memory only',
+				desc: 'Do not write sign-in data to Obsidian plugin storage. You will need to sign in again after restarting Obsidian. On by default.',
+				control: {
+					type: 'toggle',
+					key: 'credentialsInMemoryOnly',
+				},
+			},
+			{
+				name: 'Privacy',
+				desc: this.getPrivacyDisclaimer(),
+			},
+		];
+	}
+
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		// eslint-disable-next-line obsidianmd/no-unsupported-api -- only invoked by Obsidian 1.13+
+		await super.setControlValue(key, value);
+		if (key === 'credentialsInMemoryOnly' && value === true) {
+			await clearPersistedCredentials(this.plugin);
+		}
+		// Refresh account status / privacy copy that depend on this toggle.
+		// eslint-disable-next-line obsidianmd/no-unsupported-api -- only reached on Obsidian 1.13+
+		this.update();
+	}
+
+	/**
+	 * Fallback for Obsidian versions before 1.13.0.
+	 * Skipped when {@link getSettingDefinitions} returns a non-empty array.
+	 */
 	display(): void {
+		this.renderLegacySettings();
+	}
+
+	private renderLegacySettings(): void {
 		const { containerEl } = this;
 
 		containerEl.empty();
-
-		new Setting(containerEl).setName('Proton drive').setHeading();
 
 		new Setting(containerEl)
 			.setName('Account status')
@@ -34,12 +102,12 @@ export class ProtonSettingTab extends PluginSettingTab {
 				if (this.plugin.driveService.isLoggedIn()) {
 					button.setButtonText('Sign out').onClick(async () => {
 						await this.plugin.signOutOfProtonDrive();
-						this.display();
+						this.renderLegacySettings();
 					});
 				} else {
 					button.setButtonText('Sign in').onClick(async () => {
 						await this.plugin.signInToProtonDrive();
-						this.display();
+						this.renderLegacySettings();
 					});
 				}
 			});
@@ -58,7 +126,7 @@ export class ProtonSettingTab extends PluginSettingTab {
 						if (value) {
 							await clearPersistedCredentials(this.plugin);
 						}
-						this.display();
+						this.renderLegacySettings();
 					}),
 			);
 
