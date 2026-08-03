@@ -7,7 +7,7 @@ import {
 
 import { DriveService } from '../proton/drive-service';
 import { ProtonEmbedResolver } from '../proton/embed/resolver';
-import { isProtonDriveUrl } from '../proton/url-parser';
+import { isProtonDriveUrl, PROTON_DRIVE_PROTOCOL } from '../proton/url-parser';
 
 export class ProtonDriveEmbed extends MarkdownRenderChild {
 	private blobUrl?: string;
@@ -90,23 +90,18 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 			case 'auth-required':
 				this.containerEl.addClass('proton-drive-embed-placeholder');
 				this.containerEl.createSpan({
-					text: 'Sign in to proton drive to embed this file. ',
+					text: 'Sign in to proton drive to embed this file.',
 				});
-				this.containerEl.createEl('a', {
-					cls: 'proton-drive-embed-link',
-					text: 'Open link',
-					href: result.sourceUrl,
-				});
+				this.addOpenLinkUnlessProtocol(result.sourceUrl, 'Open link');
 				break;
 
 			case 'unsupported':
 				this.containerEl.addClass('proton-drive-embed-placeholder');
-				this.containerEl.createSpan({ text: `${result.reason}. ` });
-				this.containerEl.createEl('a', {
-					cls: 'proton-drive-embed-link',
-					text: result.fileName ?? 'Open in Proton drive',
-					href: result.sourceUrl,
-				});
+				this.containerEl.createSpan({ text: `${result.reason}.` });
+				this.addOpenLinkUnlessProtocol(
+					result.sourceUrl,
+					result.fileName ?? 'Open in Proton drive',
+				);
 				break;
 		}
 	}
@@ -166,6 +161,18 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 		this.containerEl.createDiv({
 			cls: 'proton-drive-embed-caption',
 			text: fileName,
+		});
+	}
+
+	private addOpenLinkUnlessProtocol(sourceUrl: string, label: string): void {
+		if (sourceUrl.startsWith(PROTON_DRIVE_PROTOCOL)) {
+			return;
+		}
+		this.containerEl.createSpan({ text: ' ' });
+		this.containerEl.createEl('a', {
+			cls: 'proton-drive-embed-link',
+			text: label,
+			href: sourceUrl,
 		});
 	}
 
