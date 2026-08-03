@@ -1,9 +1,4 @@
-import {
-	App,
-	PluginSettingTab,
-	Setting,
-	SettingDefinitionItem,
-} from 'obsidian';
+import { App, PluginSettingTab, SettingDefinitionItem } from 'obsidian';
 
 import { clearPersistedCredentials } from './plugin-storage';
 import ObsidianProtonPlugin from './main';
@@ -25,10 +20,6 @@ export class ProtonSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	/**
-	 * Obsidian 1.13.0+: declarative definitions for settings search and auto-save.
-	 * {@link display} remains as a fallback for older Obsidian versions.
-	 */
 	getSettingDefinitions(): SettingDefinitionItem<'credentialsInMemoryOnly'>[] {
 		return [
 			{
@@ -41,7 +32,6 @@ export class ProtonSettingTab extends PluginSettingTab {
 								.setButtonText('Sign out')
 								.onClick(async () => {
 									await this.plugin.signOutOfProtonDrive();
-									// eslint-disable-next-line obsidianmd/no-unsupported-api -- only reached on Obsidian 1.13+
 									this.update();
 								});
 						} else {
@@ -49,7 +39,6 @@ export class ProtonSettingTab extends PluginSettingTab {
 								.setButtonText('Sign in')
 								.onClick(async () => {
 									await this.plugin.signInToProtonDrive();
-									// eslint-disable-next-line obsidianmd/no-unsupported-api -- only reached on Obsidian 1.13+
 									this.update();
 								});
 						}
@@ -72,65 +61,11 @@ export class ProtonSettingTab extends PluginSettingTab {
 	}
 
 	async setControlValue(key: string, value: unknown): Promise<void> {
-		// eslint-disable-next-line obsidianmd/no-unsupported-api -- only invoked by Obsidian 1.13+
 		await super.setControlValue(key, value);
 		if (key === 'credentialsInMemoryOnly' && value === true) {
 			await clearPersistedCredentials(this.plugin);
 		}
-		// Refresh account status / privacy copy that depend on this toggle.
-		// eslint-disable-next-line obsidianmd/no-unsupported-api -- only reached on Obsidian 1.13+
 		this.update();
-	}
-
-	/**
-	 * Fallback for Obsidian versions before 1.13.0.
-	 * Skipped when {@link getSettingDefinitions} returns a non-empty array.
-	 */
-	display(): void {
-		this.renderLegacySettings();
-	}
-
-	private renderLegacySettings(): void {
-		const { containerEl } = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Account status')
-			.setDesc(this.getAccountStatusDescription())
-			.addButton((button) => {
-				if (this.plugin.driveService.isLoggedIn()) {
-					button.setButtonText('Sign out').onClick(async () => {
-						await this.plugin.signOutOfProtonDrive();
-						this.renderLegacySettings();
-					});
-				} else {
-					button.setButtonText('Sign in').onClick(async () => {
-						await this.plugin.signInToProtonDrive();
-						this.renderLegacySettings();
-					});
-				}
-			});
-
-		new Setting(containerEl)
-			.setName('Keep credentials in memory only')
-			.setDesc(
-				'Do not write sign-in data to Obsidian plugin storage. You will need to sign in again after restarting Obsidian. On by default.',
-			)
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.settings.credentialsInMemoryOnly)
-					.onChange(async (value) => {
-						this.plugin.settings.credentialsInMemoryOnly = value;
-						await this.plugin.saveSettings();
-						if (value) {
-							await clearPersistedCredentials(this.plugin);
-						}
-						this.renderLegacySettings();
-					}),
-			);
-
-		new Setting(containerEl).setDesc(this.getPrivacyDisclaimer());
 	}
 
 	private getAccountStatusDescription(): string {
