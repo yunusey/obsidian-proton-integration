@@ -165,7 +165,11 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 	}
 
 	private addOpenLinkUnlessProtocol(sourceUrl: string, label: string): void {
-		if (sourceUrl.startsWith(PROTON_DRIVE_PROTOCOL)) {
+		try {
+			if (new URL(sourceUrl).protocol === PROTON_DRIVE_PROTOCOL) {
+				return;
+			}
+		} catch {
 			return;
 		}
 		this.containerEl.createSpan({ text: ' ' });
