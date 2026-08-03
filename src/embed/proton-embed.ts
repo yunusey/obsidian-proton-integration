@@ -50,6 +50,7 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 
 		const result = await this.resolver.prepareEmbed(this.sourceUrl);
 		if (generation !== this.loadGeneration) {
+			this.releasePreparedBlob(result);
 			return;
 		}
 
@@ -118,6 +119,7 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 		generation: number,
 	): Promise<void> {
 		if (generation !== this.loadGeneration) {
+			this.releasePreparedBlob(result);
 			return;
 		}
 
@@ -174,7 +176,20 @@ export class ProtonDriveEmbed extends MarkdownRenderChild {
 		}
 	}
 
+	private releasePreparedBlob(
+		result: Awaited<ReturnType<ProtonEmbedResolver['prepareEmbed']>>,
+	): void {
+		if (
+			result.status === 'ready' &&
+			'blobUrl' in result &&
+			result.blobUrl
+		) {
+			this.resolver.releaseBlobUrl(result.blobUrl);
+		}
+	}
+
 	onunload(): void {
+		this.loadGeneration++;
 		this.releaseCurrentBlob();
 	}
 }
