@@ -14,7 +14,7 @@ import { DriveService } from './proton/drive-service';
 import { DEFAULT_SETTINGS, PluginSettings, ProtonSettingTab } from './settings';
 
 export default class ObsidianProtonPlugin extends Plugin {
-	settings!: PluginSettings;
+	declare settings: PluginSettings;
 	driveService!: DriveService;
 	embedResolver!: ProtonEmbedResolver;
 
