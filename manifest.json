@@ -1,7 +1,7 @@
 {
 	"id": "proton-integration",
 	"name": "Proton Drive Integration",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"minAppVersion": "1.13.0",
 	"description": "Embed Proton Drive files into your vault.",
 	"author": "yunusey",
