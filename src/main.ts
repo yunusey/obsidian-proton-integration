@@ -38,6 +38,7 @@ export default class ObsidianProtonPlugin extends Plugin {
 			(processor) => this.registerMarkdownPostProcessor(processor),
 			this.app,
 			this.embedResolver,
+			this.driveService,
 		);
 
 		this.addCommand({
@@ -114,6 +115,7 @@ export default class ObsidianProtonPlugin extends Plugin {
 			});
 			modal.close();
 			new Notice('Signed in to proton drive');
+			this.driveService.notifyAuthChange();
 		} catch (error) {
 			modal.close();
 			const message =

@@ -26,6 +26,7 @@ export class DriveService {
 	private clientUid?: string;
 	private photosVolumeId?: string;
 	private driveVolumeId?: string;
+	private readonly authChangeListeners = new Set<() => void>();
 
 	constructor(
 		private readonly credentialsStore: CredentialsStore,
@@ -45,6 +46,24 @@ export class DriveService {
 
 	isLoggedIn(): boolean {
 		return this.credentials.isLoggedIn();
+	}
+
+	/**
+	 * Register a listener for sign-in / sign-out. Returns an unsubscribe function.
+	 * Embeds use this so they can reload without relying on Obsidian re-running
+	 * markdown postprocessors (reading view HTML is often cached).
+	 */
+	onAuthChange(listener: () => void): () => void {
+		this.authChangeListeners.add(listener);
+		return () => {
+			this.authChangeListeners.delete(listener);
+		};
+	}
+
+	notifyAuthChange(): void {
+		for (const listener of this.authChangeListeners) {
+			listener();
+		}
 	}
 
 	getAuth(): Auth {
@@ -90,6 +109,7 @@ export class DriveService {
 		this.photosVolumeId = undefined;
 		this.driveVolumeId = undefined;
 		await this.credentials.signOut();
+		this.notifyAuthChange();
 	}
 
 	private async ensureVolumeIds(): Promise<void> {

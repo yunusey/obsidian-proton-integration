@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting } from 'obsidian';
 
 import { clearPersistedCredentials } from './plugin-storage';
 import ObsidianProtonPlugin from './main';
@@ -33,8 +33,7 @@ export class ProtonSettingTab extends PluginSettingTab {
 			.addButton((button) => {
 				if (this.plugin.driveService.isLoggedIn()) {
 					button.setButtonText('Sign out').onClick(async () => {
-						await this.plugin.driveService.logout();
-						new Notice('Signed out of proton drive');
+						await this.plugin.signOutOfProtonDrive();
 						this.display();
 					});
 				} else {
