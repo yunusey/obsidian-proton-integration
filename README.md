@@ -1,3 +1,6 @@
+
+</think>
+
 # Proton Drive Integration
 
 Bridge between [Obsidian](https://obsidian.md) and [Proton Drive](https://proton.me/drive), built on the official [`@protontech/drive-sdk`](https://www.npmjs.com/package/@protontech/drive-sdk). This is an independent project and is **not affiliated with, endorsed by, or sponsored by Proton AG** or any of its products.
@@ -23,7 +26,7 @@ npm run build
 npm run typecheck
 ```
 
-Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/plugins/obsidian-proton-integration/` folder (or symlink the repo).
+Copy `main.js`, `manifest.json`, and `styles.css` into your vault's `.obsidian/plugins/proton-integration/` folder (or symlink the repo).
 
 ## Usage
 
